@@ -27,7 +27,7 @@ require 'rack/ssl-enforcer'
 require 'logger'
 
 DB = Sequel.connect ENV['DATABASE_URL']
-Sequel.extension :migrations
+Sequel.extension :migration
 Sequel::Migrator.apply(DB, './db/migrations')
 
 use Rack::SslEnforcer, hsts: true if ENV['RACK_ENV'] == 'production'

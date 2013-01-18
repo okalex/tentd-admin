@@ -1,172 +1,72 @@
-# tentd-admin
+## Tent.io Server Jumpstart for AppFog
 
-tentd-admin implements a very basic administration interface for
-[tentd](https://github.com/tent/tentd). It also mounts tentd as a Rack app, so
-it's the easiest way to get started with a [Tent Protocol](http://tent.io)
-implementation.
+This is based on the [tent-admin](https://github.com/tent/tentd) adminstrative interface for [Tent.io](https://tent.io). We have made a variety of AppFog-specific changes to enable you to easily launch a Tent.io server. All database connections, for example, have been automated. Here's how to get your Tent.io server up and running:
 
-## Updating to 0.2
+# 1. Sign up for an AppFog account and sign
 
-You'll need to create a table `schema_info` and set `schema_info.version = 1`, then run `rake db:migrate`:
+Go to the AppFog [sign up page](https://console.appfog.com/) and sign up for an account. Accounts are free, and the free tier allocation of 2 GB of RAM should be more than enough to run a Tent.io server (unless it is incredibly high volume). Once you have done so, log in either in the AppFog [console](https://console.appfog.com/) or login in the command line if you have Ruby and the `af` gem installed.
 
-```sql
-CREATE TABLE schema_info (version integer);
-INSERT INTO schema_info (version) VALUES (1);
-```
+# 2. Download the AppFog command line tool
 
-### Heroku
+First, make sure you have Ruby version `1.8.7` or higher installed. Then, download the AppFog CLI tool, which is actually a Ruby gem:
 
 ```
-heroku run rake db:migrate
+gem install af
 ```
 
-### Ruby
+# 3. Get the source code and load dependencies
+
+First, clone this repo into your desired directory:
 
 ```
-DATABASE_URL=postgres://localhost/tent_server bundle exec rake db:migrate
+git clone https://github.com/lucperkins/af-tentio-jumpstart
+cd af-tentio-jumpstart
 ```
 
+Then, run a `bundle install` to load all the necessary Ruby gems.
 
-## Getting Started
+# 4. Push the app to AppFog
 
-### Heroku
-
-```shell
-heroku create --addons heroku-postgresql:dev
-heroku pg:promote $(heroku pg | head -1 | cut -f2 -d" ")
-heroku config:add ADMIN_USERNAME=admin ADMIN_PASSWORD=password ADMIN_ASSET_MANIFEST=./public/assets/manifest.json
-git push heroku master
-heroku run rake db:migrate
-heroku open
-```
-
-### Ruby
-
-tentd-admin requires Ruby 1.9. If you don't have Ruby 1.9 you can use your
-operating system's package manager to install it.
-
-#### OS X
-
-The easiest way to get Ruby 1.9 on OS X is to use [Homebrew](http://mxcl.github.com/homebrew/).
-
-```shell
-brew install ruby
-```
-
-If you need to switch between ruby versions, use
-[rbenv](https://github.com/sstephenson/rbenv) and
-[ruby-build](https://github.com/sstephenson/ruby-build).
-
-
-#### Ubuntu
-
-```shell
-sudo apt-get install build-essential ruby1.9.1-full libxml2 libxml2-dev libxslt1-dev
-sudo update-alternatives --config ruby # make sure 1.9 is the default
-```
-
-
-### PostgreSQL
-
-tentd-admin requires a PostgreSQL database.
-
-#### OS X
-
-Use [Homebrew](http://mxcl.github.com/homebrew/) or [Postgres.app](http://postgresapp.com/).
-
-```shell
-brew install postgresql
-createdb tent_server
-```
-
-
-### Bundler
-
-Bundler is a project dependency manager for Ruby.
+If you are signed up for AppFog and logged in and are in the root of the directory that was just cloned from GitHub, you can push the app to AppFog:
 
 ```
-gem install bundler
+af push --runtime ruby193
 ```
 
+At that point, you will be prompted with a variety of questions. I will list these questions in code format and the desired responses in **bold**:
 
-### Starting tentd-admin
+`Would you like to deploy from the current directory?` **yes**
+`Application Name` **choose any name you like, as long as it is unique**
+`Detected a Rack application, is this correct?` **yes**
+`Select infrastructure` **choose any infrastructure you wish**
+`Application deployed URL [<app-url>]` **hit Enter**
+`Memory reservation` **we recommend selecting 256M or higher**
+`How many instances?` **select 1 instance for now (others may be added later)**
+`Bind existing services to <app-name>?` **no**
+`Create services to bind to <app-name>?` **yes**
+`What kind of service?` **3: postgresql**
+`Specify the name of the service [<service-name>]` **hit Enter**
+`Create another?` **no**
+`Would you like to save this configuration?` **yes**
 
-Clone this repository, and `cd` into the directory. This should start the app:
+Once you have done this, the app will be pushed to the AppFog server and then staged and started. This will likely take more than a minute, as server migration will be done behind the scenes.
 
-```shell
-bundle install
-DATABASE_URL=postgres://localhost/tent_server bundle exec rake db:migrate
-DATABASE_URL=postgres://localhost/tent_server ADMIN_USERNAME=admin ADMIN_PASSWORD=admin bundle exec puma -p 3000
-```
+# 5. Set your username and password
 
-If all goes well, you'll have a Tent server available at
-[http://localhost:3000/](http://localhost:3000/) and you can log into the admin
-interface at [http://localhost:3000/admin](http://postgresapp.com/) with the
-username and password `admin`. After setting up the base profile in the admin,
-this should show the profile JSON:
-
-```shell
-curl http://localhost:3000/profile
-```
-
-### Environment Variables
-
-Some environment variables should be set to configure tentd and tentd-admin.
-
-| Name | Required | Description |
-| ---- | -------- | ----------- |
-| DATABASE_URL | Required | The connection details for the PostgreSQL database (ex: `postgres://user:password@host/dbname`) |
-| ADMIN_USERNAME | Required | The username used to access tentd-admin. |
-| ADMIN_PASSWORD | Required | The password used to access tentd-admin. |
-| RACK_ENV | Optional | Defaults to `development`. Set to `production` for production deployments. |
-| SERVE_ASSETS | Optional | Should be set if `RACK_ENV` is set to `production` and assets aren't on a CDN. |
-| ADMIN_ASSET_MANIFEST | Optional | Should be set if `RACK_ENV` is set to `production` and `SERVE_ASSETS` is not set. |
-| TENT_ENTITY | Optional | Set to the exact Tent Entity URL if tentd is not responding to requests at the URL. |
-| TENT_SUBDIR | Optional | Treat all URLs as being under a subdirectory, e.g. "/tent". |
-
-### HTTP Headers
-
-If you are running a reverse-proxy in front of tentd, the `X-Forwarded-Port` and `Host` request headers need to be set.
-
-#### nginx
+Before you can use your Tent.io server on AppFog, you'll need to set your username and password. This can be done by setting environment variables for your app. Run the following commands to do so:
 
 ```
-location / {
-  proxy_set_header Host $host;
-  proxy_set_header X-Forwarded-Proto https;
-  proxy_set_header X-Forwarded-Port 443;
-  proxy_pass http://tentd;
-}
+af env-add <app-name> ADMIN_USERNAME=<your-chosen-username>
+af env-add <app-name> ADMIN_PASSWORD=<your-chosen-password>
+af env-add <app-name> SERVE_ASSETS=1
 ```
 
-#### apache
+If you forget your username or password, you can simply run `af env <app-name>` to retrieve them.
 
-```
-<VirtualHost tentd.example.com>
-ProxyRequests Off
-ProxyPreserveHost On
-ProxyPass / http://localhost:3000/
-ProxyPassReverse / http://localhost:3000
+# 6. Using your server
 
-RequestHeader set Host tentd.example.com
-RequestHeader set X-Forwarded-Proto https
-RequestHeader set X-Forwarded-Port 443
+To get the URL for the app that is now running on AppFog, simply enter `af apps`, hit Enter, and then copy and paste the URL for the app into your browser.
 
-</VirtualHost>
-```
+When you go that address, it should simply say 'Tent!' if the deployment process has succeeded. If you would like to begin using the admin interface go to the `/admin` directory of the root URL.
 
-## Contributing
-
-Currently tentd-admin only implements app authentication and following creation.
-These are some things that could be done to improve the app:
-
-- Add support for managing (CRUD) all of the data in Tent: profiles, followers,
-  followings, apps, and posts.
-- Add a log in the UI of API calls to tentd for easy debugging.
-- Write tests and refactor the code.
-- Make a pretty UI.
-- Allow creation of the database and setting username/password from the UI.
-- Show better app details in OAuth flow (icon, post/profile type details)
-- Replace tentd database hooks with API calls
-- Create an omnibus-style package that installs and configures everything needed
-  to get started with tentd-admin.
+When you get there, you can start configuring your Tent.io server!
