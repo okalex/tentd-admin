@@ -36,17 +36,29 @@ af push --runtime ruby193
 At that point, you will be prompted with a variety of questions. I will list these questions in code format and the desired responses in **bold**:
 
 `Would you like to deploy from the current directory?` **yes**
+
 `Application Name` **choose any name you like, as long as it is unique**
+
 `Detected a Rack application, is this correct?` **yes**
+
 `Select infrastructure` **choose any infrastructure you wish**
+
 `Application deployed URL [<app-url>]` **hit Enter**
+
 `Memory reservation` **we recommend selecting 256M or higher**
+
 `How many instances?` **select 1 instance for now (others may be added later)**
+
 `Bind existing services to <app-name>?` **no**
+
 `Create services to bind to <app-name>?` **yes**
+
 `What kind of service?` **3: postgresql**
+
 `Specify the name of the service [<service-name>]` **hit Enter**
+
 `Create another?` **no**
+
 `Would you like to save this configuration?` **yes**
 
 Once you have done this, the app will be pushed to the AppFog server and then staged and started. This will likely take more than a minute, as server migration will be done behind the scenes.
