@@ -141,6 +141,7 @@ DEPENDENCIES
   asset_sync!
   girl_friday
   mime-types
+  pg
   puma
   rack-ssl-enforcer
   rake

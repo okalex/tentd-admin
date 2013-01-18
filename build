@@ -1,0 +1,31 @@
+#!/usr/bin/env python
+
+from github import Github
+import git
+import subprocess
+import sys
+import os
+
+g = Github()
+
+for repo in g.get_user("appfog").get_repos():
+    if repo.name.startswith("af-"):
+        print "cloning %s" % (repo.name)
+        git.Git().clone(repo.clone_url, repo.name)
+
+        if 'java' in repo.name:
+            # go to war
+            for f in os.listdir(repo.name):
+                if os.path.splitext(f)[1] == ".war":
+                    path = "%s/%s" % (repo.name, f)
+                    os.rename(path, "zips/" + repo.name + ".war.zip")
+        else:
+           print "zipballing %s" % (repo.name)
+           zipball_path = "../zips/%s" % (repo.name)
+           subprocess.Popen(['zip', '-y', '-r', zipball_path, '.', '-x', '.git/*', '.gitignore'], cwd=repo.name, stdout=subprocess.PIPE).communicate()[0].split()
+
+        print "removing source"
+        subprocess.Popen(['rm', '-rf', repo.name], stdout=subprocess.PIPE).communicate()[0].split()
+
+
+sys.exit(0)

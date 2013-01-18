@@ -2,6 +2,22 @@ lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'bundler/setup'
+require 'pg'
+require 'json'
+
+vcap_services = JSON.parse(ENV.fetch('VCAP_SERVICES'))
+postgresql = vcap_services['postgresql-9.1']
+if service_name = ENV.fetch('DB_SERVICE_NAME', nil)
+  service = postgresql.detect{|s| s['name'] == service_name }
+else
+  service = postgresql.first
+end
+creds = OpenStruct.new(service['credentials'])
+url = ["postgres://"]
+url << "#{creds.username}:#{creds.password}"
+url << "@#{creds.host}:#{creds.port}"
+url << "/#{creds.name}"
+ENV['DATABASE_URL'] = url.join('')
 
 require 'tentd'
 require 'tentd-admin/app'
@@ -10,7 +26,9 @@ require 'tentd-admin/set_entity'
 require 'rack/ssl-enforcer'
 require 'logger'
 
-Sequel.connect(ENV['DATABASE_URL'], :logger => Logger.new(STDOUT))
+DB = Sequel.connect ENV['DATABASE_URL']
+Sequel.extension :migrations
+Sequel::Migrator.apply(DB, './db/migrations')
 
 use Rack::SslEnforcer, hsts: true if ENV['RACK_ENV'] == 'production'
 

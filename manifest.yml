@@ -1,0 +1,17 @@
+--- 
+applications: 
+  .: 
+    instances: 1
+    services: 
+      postgresql-ea1b1: 
+        type: postgresql
+    infra: aws
+    name: lucperkins-tent
+    framework: 
+      info: 
+        description: Rack Application
+        exec: 
+        mem: 128M
+      name: rack
+    mem: 256M
+    url: ${name}.${target-base}
