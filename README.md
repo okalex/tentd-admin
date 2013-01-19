@@ -73,6 +73,8 @@ af env-add <app-name> ADMIN_PASSWORD=<your-chosen-password>
 af env-add <app-name> SERVE_ASSETS=1
 ```
 
+If you'd like, you can also set these environment variables in the AppFog [console](https://console.appfog.com/).
+
 If you forget your username or password, you can simply run `af env <app-name>` to retrieve them.
 
 ## 6. Using your server
