@@ -19,8 +19,8 @@ gem install af
 First, clone this repo into your desired directory:
 
 ```
-git clone https://github.com/lucperkins/af-tentio-jumpstart
-cd af-tentio-jumpstart
+git clone https://github.com/lucperkins/tentd-admin.git
+cd tentd-admin
 ```
 
 Then, run a `bundle install` to load all the necessary Ruby gems.
